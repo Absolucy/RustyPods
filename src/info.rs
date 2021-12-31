@@ -87,13 +87,10 @@ impl AirpodsInfo {
 	}
 
 	fn get_battery(batt: u8) -> Result<Option<u8>> {
-		if batt == 15 {
-			Ok(None)
-		} else {
-			if !(0..=10).contains(&batt) {
-				return Err(anyhow!("Invalid battery level: {}", batt));
-			}
-			Ok(Some(batt * 10))
+		match batt {
+			0..=10 => Ok(Some(batt * 10)),
+			15 => Ok(None),
+			_ => Err(anyhow!("Invalid battery level: {}", batt)),
 		}
 	}
 }
