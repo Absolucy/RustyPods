@@ -1,47 +1,45 @@
 #[macro_use]
 extern crate tracing;
 
-pub mod info;
+mod bt;
+mod dbus;
+mod info;
 
-use bluez_async::{BluetoothEvent, BluetoothSession, DeviceEvent, DiscoveryFilter};
-use futures_util::StreamExt;
-use std::error::Error;
+use anyhow::{Context, Result};
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-	let (_, session) = BluetoothSession::new().await?;
-	let mut events = session.event_stream().await?;
-	session
-		.start_discovery_with_filter(&DiscoveryFilter {
-			duplicate_data: Some(true),
-			..DiscoveryFilter::default()
-		})
-		.await?;
-
-	println!("Events:");
-	while let Some(event) = events.next().await {
-		let manufacturer_data = match event {
-			BluetoothEvent::Device {
-				event: DeviceEvent::ManufacturerData { manufacturer_data },
-				..
-			} => manufacturer_data,
-			_ => continue,
-		};
-		let data = match manufacturer_data.get(&76) {
-			Some(data) => data,
-			None => {
-				continue;
-			}
-		};
-		debug!("got airpods manufacturer data: {:?}", manufacturer_data);
-		if data.len() != 27 {
-			debug!("this ain't what we want, nevermind");
-			continue;
-		}
-		if let Ok(info) = info::AirpodsInfo::parse_from_beacon(data) {
-			println!("{:?}\n{}\n", info, hex::encode(data));
-		}
+async fn main() -> Result<()> {
+	// Set up logging
+	let subscriber = FmtSubscriber::builder()
+		.with_max_level(Level::INFO)
+		.finish();
+	tracing::subscriber::set_global_default(subscriber)
+		.context("setting default subscriber failed")?;
+	// Set up the DBus server
+	let current_info = Arc::new(RwLock::new(None));
+	let conn = zbus::ConnectionBuilder::session()
+		.context("failed to get zbus connection")?
+		.serve_at(
+			"/moe/absolucy/RustyPods",
+			dbus::RustyPodsService {
+				current_info: current_info.clone(),
+			},
+		)
+		.context("Failed to serve at /moe/absolucy/RustyPods")?
+		.name("moe.absolucy.RustyPods")
+		.context("Failed to set name to moe.absolucy.RustyPods")?
+		.internal_executor(false)
+		.build()
+		.await
+		.context("Failed to set up DBus server")?;
+	// Run the bluetooth listener
+	tokio::spawn(bt::run_bluetooth_listener(current_info));
+	// Tick the D-Bus connector
+	loop {
+		conn.executor().tick().await;
 	}
-
-	Ok(())
 }

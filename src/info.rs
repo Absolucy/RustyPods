@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use zvariant::{DeserializeDict, SerializeDict, TypeDict};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct AirpodsInfo {
@@ -107,7 +108,7 @@ pub enum AirpodsBattery {
 	},
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default, DeserializeDict, SerializeDict, TypeDict)]
 pub struct AirpodsInEar {
 	left: bool,
 	right: bool,
