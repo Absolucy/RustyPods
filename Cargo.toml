@@ -1,9 +1,12 @@
 [package]
 name = "rustypods"
+description = "A service for getting info about AirPods on Linux!"
+authors = ["Lucy <lucy@absolucy.moe>"]
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "BSD-3-Clause"
+repository = "https://github.com/Absolucy/RustyPods"
+keywords = ["airpods", "apple", "service", "bluetooth", "earbuds"]
 
 [dependencies]
 tokio = { version = "1.15.0", features = ["full"] }
@@ -16,5 +19,3 @@ anyhow = "1.0.52"
 zbus = "2.0.1"
 zvariant = "3.0.0"
 serde = "1.0.133"
-
-[features]

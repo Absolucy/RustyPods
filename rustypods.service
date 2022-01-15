@@ -1,0 +1,6 @@
+[Service]
+ExecStart=/usr/bin/rustypods
+Restart=always
+
+[Install]
+WantedBy=default.target
