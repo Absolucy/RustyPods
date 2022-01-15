@@ -1,0 +1,21 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+	<interface name="moe.absolucy.RustyPods1">
+		<method name="Info">
+			<arg type="a{sv}" direction="out"/>
+		</method>
+		<method name="Battery">
+			<arg type="a{sv}" direction="out"/>
+		</method>
+		<method name="Charging">
+			<arg type="a{sv}" direction="out"/>
+		</method>
+		<method name="InEars">
+			<arg type="a{sv}" direction="out"/>
+		</method>
+		<method name="Model">
+			<arg type="u" direction="out"/>
+		</method>
+	</interface>
+</node>
