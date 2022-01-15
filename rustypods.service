@@ -1,6 +1,10 @@
+[Unit]
+Description=AirPods Status Service
+
 [Service]
 ExecStart=/usr/bin/rustypods
 Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=default.target
